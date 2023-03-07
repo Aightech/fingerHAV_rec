@@ -6,3 +6,19 @@
 	path = prgm/kistler_DAQ
 	url = git@github.com:Aightech/kistler_DAQ
 	branch = main
+[submodule "prgm/lslsub_dbfeeder"]
+	path = prgm/lslsub_dbfeeder
+	url = git@github.com:Aightech/lslsub_dbfeeder
+	branch = main
+[submodule "prgm/finger_pos"]
+	path = prgm/finger_pos
+	url = git@github.com:Aightech/finger_pos
+	branch = main
+[submodule "prgm/loadcells"]
+	path = prgm/loadcells
+	url = git@github.com:Aightech/loadcells
+	branch = main
+[submodule "prgm/lslsub_plotter"]
+	path = prgm/lslsub_plotter
+	url = git@github.com:Aightech/lslsub_plotter
+	branch = main

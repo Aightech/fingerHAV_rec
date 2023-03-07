@@ -81,6 +81,25 @@ else ()
   ###### C++ standard ######
   set(CMAKE_CXX_STANDARD 11)
   set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+
+  ###### QT libraries ######
+  if(1)
+      set(CMAKE_PREFIX_PATH "/opt/6.2.4/gcc_64")
+      set(CMAKE_INCLUDE_CURRENT_DIR ON)
+      set(CMAKE_AUTOUIC ON)
+      set(CMAKE_AUTOMOC ON)
+      set(CMAKE_AUTORCC ON)
+      find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core GUI Widgets PrintSupport)
+      find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets PrintSupport)
+      find_package(Qt6 COMPONENTS PrintSupport REQUIRED)
+      set(QT_QPA_PLATFORM "wayland")
+    if (Qt${QT_VERSION_MAJOR}_FOUND)
+      list(APPEND EXTRA_LIBS Qt6::Widgets )
+    else ()
+      message("Couldn't find Boost library")
+    endif (Qt${QT_VERSION_MAJOR}_FOUND)
+  endif()
   
 
   ###### Get the sources and headers ######
@@ -94,6 +113,7 @@ else ()
   list(REMOVE_ITEM LIB_SRCS ${MAIN_FILE})
   file(GLOB LIB_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h" "include/*.hpp")
   list(REMOVE_ITEM LIB_HEADERS ${EXTRA_HEADERS})
+  file(GLOB APP_FORM "${CMAKE_CURRENT_SOURCE_DIR}/forms/*.ui")
 
 
   ###### check for internet ######
@@ -177,12 +197,15 @@ else ()
 
 
   ###### Create the executable ######
-  add_executable(${EXEC_NAME} ${MAIN_FILE})
+  add_executable(${EXEC_NAME} ${MAIN_FILE} ${LIB_HEADERS} ${APP_FORM})
   target_link_libraries (${EXEC_NAME}
     PUBLIC ${LIB_NAME}
-    PUBLIC ${TOOL_LIBS})
+    PUBLIC ${TOOL_LIBS}
+    PRIVATE Qt6::PrintSupport)
   target_include_directories(${EXEC_NAME}
     PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+qt_finalize_executable(${EXEC_NAME})
 
 
 
