@@ -1,0 +1,8 @@
+[submodule "tool_lib/built_lsl"]
+	path = tool_lib/built_lsl
+	url = git@github.com:Aightech/built_lsl
+	branch = main
+[submodule "prgm/kistler_DAQ"]
+	path = prgm/kistler_DAQ
+	url = git@github.com:Aightech/kistler_DAQ
+	branch = main
