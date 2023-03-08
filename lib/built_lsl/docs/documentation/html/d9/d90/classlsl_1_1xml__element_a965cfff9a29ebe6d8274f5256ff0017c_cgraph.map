@@ -1,0 +1,4 @@
+<map id="lsl::xml_element::is_text" name="lsl::xml_element::is_text">
+<area shape="rect" id="node1" title="Whether this is a text body (instead of an XML element). True both for plain char data and CData." alt="" coords="5,5,188,32"/>
+<area shape="rect" id="node2" href="$db/df3/lsl__c_8h.html#a885c3584f6f6068680bb2b61ebf387e5" title=" " alt="" coords="236,5,324,32"/>
+</map>

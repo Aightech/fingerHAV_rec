@@ -1,0 +1,13 @@
+<map id="lsl::xml_element::name" name="lsl::xml_element::name">
+<area shape="rect" id="node1" title="Name of the element." alt="" coords="248,294,424,321"/>
+<area shape="rect" id="node2" href="$d9/d90/classlsl_1_1xml__element.html#af56c7976bb62cabc9c0ca69502063fea" title="Append a child element with the specified name." alt="" coords="9,5,196,47"/>
+<area shape="rect" id="node3" href="$d9/d90/classlsl_1_1xml__element.html#a6a162d1b57049f5ecab6b68207a71d53" title=" " alt="" coords="9,71,196,112"/>
+<area shape="rect" id="node4" href="$d9/d90/classlsl_1_1xml__element.html#a111ef129dce406af43948d8c9b915148" title="Get a child with a specified name." alt="" coords="17,137,188,163"/>
+<area shape="rect" id="node5" href="$d9/d90/classlsl_1_1xml__element.html#a893102d2d84a444a89099f9c90cb6c31" title="Get child value of a child with a specified name." alt="" coords="17,188,188,229"/>
+<area shape="rect" id="node6" href="$d9/d90/classlsl_1_1xml__element.html#a100590d2a9822261a3f0b0ed7810134d" title="Get the next sibling with the specified name." alt="" coords="19,253,187,295"/>
+<area shape="rect" id="node7" href="$d9/d90/classlsl_1_1xml__element.html#abd881c6c5d0d381f9efff2fc25975e7e" title="Prepend a child element with the specified name." alt="" coords="7,319,199,360"/>
+<area shape="rect" id="node8" href="$d9/d90/classlsl_1_1xml__element.html#a3e7fde09def517574df99c71a0a05d23" title=" " alt="" coords="7,384,199,425"/>
+<area shape="rect" id="node9" href="$d9/d90/classlsl_1_1xml__element.html#a70b90853b7edfaebfe69bc1103ed6b8b" title="Get the previous sibling with the specified name." alt="" coords="5,449,200,491"/>
+<area shape="rect" id="node10" href="$d9/d90/classlsl_1_1xml__element.html#ad23da57ac3a6a7f3dd849be0a8b44a47" title="Remove a child element with the specified name." alt="" coords="8,515,197,556"/>
+<area shape="rect" id="node11" href="$d9/d90/classlsl_1_1xml__element.html#a6fe187e03b36cf8fd5f9d3892e99453f" title=" " alt="" coords="23,580,182,621"/>
+</map>

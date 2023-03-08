@@ -1,0 +1,6 @@
+<map id="lsl::stream_inlet::pull_chunk_multiplexed" name="lsl::stream_inlet::pull_chunk_multiplexed">
+<area shape="rect" id="node1" title="pull_chunk_multiplexed Pull a multiplexed chunk of samples and optionally the sample timestamps from ..." alt="" coords="5,63,181,104"/>
+<area shape="rect" id="node2" href="$d6/dbd/classlsl_1_1stream__inlet.html#a58dc91be6ec0d1b83024a169ad0c292b" title=" " alt="" coords="234,29,369,71"/>
+<area shape="rect" id="node3" href="$d6/dbd/classlsl_1_1stream__inlet.html#a8a4f5ff87d40a696ab4a5d74c03cd52b" title=" " alt="" coords="229,95,373,136"/>
+<area shape="rect" id="node4" href="$db/df3/lsl__c_8h.html#ac2fa5d87f7c6c5343ab9a6f678229f62" title=" " alt="" coords="421,102,588,129"/>
+</map>

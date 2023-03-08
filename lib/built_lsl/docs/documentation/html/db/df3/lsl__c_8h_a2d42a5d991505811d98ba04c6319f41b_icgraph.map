@@ -1,0 +1,4 @@
+<map id="lsl_streaminfo_from_xml" name="lsl_streaminfo_from_xml">
+<area shape="rect" id="node1" title="Create a streaminfo object from an XML representation." alt="" coords="248,5,433,32"/>
+<area shape="rect" id="node2" href="$d1/d6a/classlsl_1_1stream__info.html#abf8fb6ba88d2f6c4069961149f18faec" title="Utility function to create a stream_info from an XML representation." alt="" coords="5,5,200,32"/>
+</map>

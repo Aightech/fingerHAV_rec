@@ -1,0 +1,4 @@
+<map id="lsl::stream_info::sample_bytes" name="lsl::stream_info::sample_bytes">
+<area shape="rect" id="node1" title="Number of bytes occupied by a sample (0 for string&#45;typed channels)." alt="" coords="5,5,184,47"/>
+<area shape="rect" id="node2" href="$db/df3/lsl__c_8h.html#ac0ce4de263cd07fc4e3b1808e784693f" title="Number of bytes occupied by a sample (0 for string&#45;typed channels)." alt="" coords="232,13,395,39"/>
+</map>
