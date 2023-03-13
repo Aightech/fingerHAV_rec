@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_nbTrial;
     ui->pushButton_startTrial;
     ui->pushButton_endTrial;
+    ui->pushButton_matLoad;
     ui->lcdNumber_timer;
     ui->spinBox_nbTrial;
     ui->graphicsView_motion;
@@ -36,28 +37,6 @@ MainWindow::MainWindow(QWidget *parent)
     //set the user name to "user"
     ui->lineEdit_userName->setText("user");
 
-    // search for a list of materials in the current directory store in a file .conf
-    // the file .conf is read: the materials name is separated by new line. and stored in a list
-    // the list is displayed in the treeWidget_mat
-    // the user can select a material by clicking on it
-    // the user can also request a random material by clicking on the button "Random"
-
-    // search for a .conf file in the current directory:
-    QString fileName = "material.conf";
-    QFile file(fileName);
-    std::cout << "file name: " << fileName.toStdString() << std::endl;
-    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        std::cout << "Error: file " << fileName.toStdString() << " not found"
-                  << std::endl;
-        return;
-    }
-    // read the file and store the material name in a list
-    QTextStream in(&file);
-    QStringList list;
-    while(!in.atEnd()) list << in.readLine();
-    file.close();
-
     //add a column to the treeWidget_mat and set the header (Name , Description, trial)
     ui->treeWidget_mat->setColumnCount(3);
     ui->treeWidget_mat->setHeaderLabels(QStringList() << "Name"
@@ -68,14 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->treeWidget_mat->setColumnWidth(1, 120);
     ui->treeWidget_mat->setColumnWidth(2, 50);
 
-    // add the materials' name to the treeWidget_mat
-    for(int i = 0; i < list.size(); i++)
-    {
-        QTreeWidgetItem *item = new QTreeWidgetItem(ui->treeWidget_mat);
-        item->setText(0, list.at(i));
-        item->setText(1, "");
-        item->setText(2, "0");
-    }
+    pushButton_load_released();
 
     //get the icon path of the three stream button (kistler, loadcells, finger_pos) to "user-offline"
     ui->pushButton_kistler->setIcon(QIcon::fromTheme("user-offline"));
@@ -125,6 +97,8 @@ MainWindow::MainWindow(QWidget *parent)
             SLOT(pushButton_userName_released()));
     connect(ui->pushButton_userName, SIGNAL(released()), this,
             SLOT(pushButton_userName_released()));
+    connect(ui->pushButton_matLoad, SIGNAL(released()), this,
+            SLOT(pushButton_load_released()));
     connect(ui->pushButton_comment, SIGNAL(released()), this,
             SLOT(pushButton_comment_released()));
     connect(ui->pushButton_matSelect, SIGNAL(released()), this,
@@ -161,7 +135,53 @@ MainWindow::pushButton_userName_released()
     //disable the lineEdit_userName and the button_userName
     ui->lineEdit_userName->setEnabled(false);
     ui->pushButton_userName->setEnabled(false);
+
+    if(!ui->pushButton_matLoad->isEnabled())
+        ui->pushButton_nbTrial->setEnabled(true);
+    
+}
+
+void
+MainWindow::pushButton_load_released()
+{
+   // search for a list of materials in the current directory store in a file .conf
+    // the file .conf is read: the materials name is separated by new line. and stored in a list
+    // the list is displayed in the treeWidget_mat
+    // the user can select a material by clicking on it
+    // the user can also request a random material by clicking on the button "Random"
+
+    // search for a .conf file in the current directory:
+    QString fileName = ui->lineEdit_matPath->text();
+    QFile file(fileName);
+    std::cout << "file name: " << fileName.toStdString() << std::endl;
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        std::cout << "Error: file " << fileName.toStdString() << " not found"
+                  << std::endl;
+        return;
+    }
+    // read the file and store the material name in a list
+    QTextStream in(&file);
+    QStringList list;
+    while(!in.atEnd()) list << in.readLine();
+    file.close();
+
+    // add the materials' name to the treeWidget_mat
+    for(int i = 0; i < list.size(); i++)
+    {
+        QTreeWidgetItem *item = new QTreeWidgetItem(ui->treeWidget_mat);
+        item->setText(0, list.at(i));
+        item->setText(1, "");
+        item->setText(2, "0");
+    }
+
+    //disable the button_load
+    ui->pushButton_matLoad->setEnabled(false);
+    ui->lineEdit_matPath->setEnabled(false);
+
     ui->pushButton_nbTrial->setEnabled(true);
+
+  
 }
 
 void
@@ -329,7 +349,6 @@ MainWindow::pushButton_endTrial_released()
     ui->lcdNumber_timer->display(60);
     //set back the label_motion
     ui->label_motion->setText("none");
-    
 }
 
 void
@@ -347,9 +366,9 @@ MainWindow::updateTimer()
     QPen penFinger_pos;
     penFinger_pos.setColor(Qt::blue);
     penFinger_pos.setWidth(3);
-    
+
     m_scene->addRect(-a / 2, -a / 2, a, a);
-    if(m_inlet_finger_pos!=nullptr)
+    if(m_inlet_finger_pos != nullptr)
     {
         //get the finger position
         std::vector<int> finger_pos;
@@ -360,7 +379,6 @@ MainWindow::updateTimer()
                                 d, penFinger_pos);
         }
     }
-
 
     if(m_trialInProgress)
     {
@@ -375,28 +393,30 @@ MainWindow::updateTimer()
         {
             ui->label_motion->setText("circle");
             m_scene->addEllipse(D * cos(m_time / 10.0) - d / 2,
-                                D * sin(m_time / 10.0) - d / 2, d, d, penMotion);
+                                D * sin(m_time / 10.0) - d / 2, d, d,
+                                penMotion);
         }
         //second 10s circle turn counter-clockwise around the center
         else if(m_time < 200)
         {
             ui->label_motion->setText("circle");
             m_scene->addEllipse(D * cos(-m_time / 10.0) - d / 2,
-                                D * sin(-m_time / 10.0) - d / 2, d, d, penMotion);
+                                D * sin(-m_time / 10.0) - d / 2, d, d,
+                                penMotion);
         }
         //third 10s circle move back and forth horizontally
         else if(m_time < 300)
         {
             ui->label_motion->setText("line");
-            m_scene->addEllipse(D * cos(m_time / 10.0) - d / 2, 0 - d / 2, d,
-                                d, penMotion);
+            m_scene->addEllipse(D * cos(m_time / 10.0) - d / 2, 0 - d / 2, d, d,
+                                penMotion);
         }
         //fourth 10s circle move back and forth vertically
         else if(m_time < 400)
         {
             ui->label_motion->setText("line");
-            m_scene->addEllipse(0 - d / 2, D * sin(m_time / 10.0) - d / 2, d,
-                                d, penMotion);
+            m_scene->addEllipse(0 - d / 2, D * sin(m_time / 10.0) - d / 2, d, d,
+                                penMotion);
         }
         else
         {
@@ -411,3 +431,5 @@ MainWindow::updateTimer()
         }
     }
 }
+
+

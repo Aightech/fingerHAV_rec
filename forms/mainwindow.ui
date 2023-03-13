@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1217</width>
-    <height>659</height>
+    <height>696</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,33 +49,6 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
-        <item>
-         <widget class="QLabel" name="label_10">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Nb. trial/mat.</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="spinBox_nbTrial"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_nbTrial">
-          <property name="text">
-           <string>ok</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QLabel" name="label_4">
@@ -89,6 +62,64 @@
            <string>Materials:</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QLabel" name="label_9">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Path:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEdit_matPath">
+            <property name="text">
+             <string>../config/material.conf</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_matLoad">
+            <property name="text">
+             <string>Load</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
+           <widget class="QLabel" name="label_10">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Nb. trial/mat.</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spinBox_nbTrial"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_nbTrial">
+            <property name="text">
+             <string>ok</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QTreeWidget" name="treeWidget_mat">
@@ -230,7 +261,8 @@
            <string/>
           </property>
           <property name="icon">
-           <iconset theme="user-offline"/>
+           <iconset theme="user-offline">
+            <normaloff>.</normaloff>.</iconset>
           </property>
           <property name="checkable">
            <bool>false</bool>

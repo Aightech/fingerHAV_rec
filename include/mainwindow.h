@@ -14,16 +14,16 @@
 #include <QSettings>
 #include <QTreeWidgetItem>
 
+#include "lsl_cpp.h"
+#include <QGraphicsScene>
 #include <QTimer>
 #include <chrono>
 #include <iomanip> // std::setprecision
 #include <iostream>
-#include "lsl_cpp.h"
 #include <numeric>
 #include <pthread.h>
-#include <utility>
 #include <tuple>
-#include <QGraphicsScene>
+#include <utility>
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -100,10 +100,16 @@ class MainWindow : public QMainWindow
     void
     updateTimer();
 
-    private:
-    void unselect_trial();
-    void select_trial(int mat, int trial);
+    /**
+     * @brief Load the material configuration file.
+     */
+  void pushButton_load_released();
 
+    private:
+    void
+    unselect_trial();
+    void
+    select_trial(int mat, int trial);
 
     Ui::MainWindow *ui;
     //vector of material name
@@ -113,7 +119,8 @@ class MainWindow : public QMainWindow
     //number of trial for each material
     int m_nbTrial;
     //vector of trial for each material [trialID, comment, nbTrial]
-    std::vector<std::vector<std::tuple<std::string, std::string, int>>> m_matTrial;
+    std::vector<std::vector<std::tuple<std::string, std::string, int>>>
+        m_matTrial;
 
     //current material
     int m_mat;
@@ -121,19 +128,16 @@ class MainWindow : public QMainWindow
     int m_trial;
 
     //timer to update the time and motion during the trial
-    QTimer* m_timer;
+    QTimer *m_timer;
     int m_time;
-    bool m_trialInProgress=false;
+    bool m_trialInProgress = false;
 
     //LSL stream toeceive finger_pos data
-    lsl::stream_inlet* m_inlet_finger_pos=nullptr;
+    lsl::stream_inlet *m_inlet_finger_pos = nullptr;
     //LSL stream toeceive loadcells data
-    lsl::stream_inlet* m_inlet_loadcells=nullptr; 
-    
-
-
+    lsl::stream_inlet *m_inlet_loadcells = nullptr;
 
     //scene to display the motion
-    QGraphicsScene* m_scene;
+    QGraphicsScene *m_scene;
 };
 #endif // MAINWINDOW_H
