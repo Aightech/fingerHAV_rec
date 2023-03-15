@@ -11,7 +11,7 @@ The loadcells sub-program is used to display interpolated force torque data and 
 ###finger_pos
 The finger_pos sub-program is used to stream the position of the finger tip from stereoscopic cameras. It can display data from both cameras and includes the ability to calibrate nail detection color.
 
-### lsldbb
+### lslsub_dbfeeder
 The lsldb sub-program is used to manage the LSL database.
 
 ### lslplot
