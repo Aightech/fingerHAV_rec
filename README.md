@@ -8,7 +8,7 @@ This sub-program is used to capture accelerometer and audio data from Kistler se
 ### loadcells
 The loadcells sub-program is used to display interpolated force torque data and stream data from eight loads and six force torque sensors.
 
-###finger_pos
+### finger_pos
 The finger_pos sub-program is used to stream the position of the finger tip from stereoscopic cameras. It can display data from both cameras and includes the ability to calibrate nail detection color.
 
 ### lslsub_dbfeeder
@@ -17,10 +17,10 @@ The lsldb sub-program is used to manage the LSL database.
 ### lslplot
 The lslplot sub-program is used to plot data streams from the other sub-programs.
 
-## Starting script
+### Starting script
 The starting script is used to run all of the sub-programs simultaneously. It includes commands to run kistler continuous, loadcells, finger_pos, and lslplot for each sub-program.
 
-## GUI
+### GUI
 
 The GUI is a Windows application built using Qt. It allows users to check that all three LSL streams are available and create a trial. Users can select materials from a random list and keep track of the number of trials and time. They can also add comments for each trial and start the trial. The GUI runs the lsl_dbfeeder program with the [user_material_trialID] parameter. The motion to follow is started, and the OpenCV window displays the movement to follow. The GUI gets motion mode from the experiment GUI and reads force and position from the stream. It displays whether the force is in the working force range.
 
