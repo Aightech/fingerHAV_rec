@@ -24,6 +24,27 @@ The starting script is used to run all of the sub-programs simultaneously. It in
 
 The GUI is a Windows application built using Qt. It allows users to check that all three LSL streams are available and create a trial. Users can select materials from a random list and keep track of the number of trials and time. They can also add comments for each trial and start the trial. The GUI runs the lsl_dbfeeder program with the [user_material_trialID] parameter. The motion to follow is started, and the OpenCV window displays the movement to follow. The GUI gets motion mode from the experiment GUI and reads force and position from the stream. It displays whether the force is in the working force range.
 
+
+## Recording protocol
+In each trial, the volunteer sat in front of the acquisition setup and waited for the start of the recording. At the beginning of each trial, the finger was placed above the texture without touching it, enabling the calibration of the load measurement. 
+
+### Motions
+To provide variability in the recorded movements, each trial included,
+- 3s above the texture without touching
+- 10s of lateral back and forth sliding. 
+- 10s of proximal/distal back and forth sliding. 
+- 10s of clockwise circular sliding.
+- 10s of anti-clockwise circular sliding.
+- 20s of unconstrained sliding.
+
+
+The volunteer made best efforts to follow the displayed target in the GUI during the constrained motion phase. During the last 20~s of unconstrained motion, volunteer was free to vary the load and the scanning speed.
+
+### Textures
+The textures are selected randomly and changed after each trial to limit any "learning" and limit the disconfort of touching rougth texture for a prolonged time.
+
+
+
 # Building source code
 
 To build the project run:
