@@ -1,7 +1,7 @@
 # fingerHAV_rec
 fingerHAV_rec is a module for recording and analyzing finger motion data. It consists of several sub-programs that work together to capture and process data from multiple sources, including Kistler sensors, load cells, and stereoscopic cameras.
 
-##  Programs
+##  Programs (in prgm/ folder)
 ### kistler
 This sub-program is used to capture accelerometer and audio data from Kistler sensors. It can be set up for continuous recording, and is designed to ensure that any run will work.
 
