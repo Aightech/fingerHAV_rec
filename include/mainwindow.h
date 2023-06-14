@@ -24,6 +24,7 @@
 #include <pthread.h>
 #include <tuple>
 #include <utility>
+#include <string>
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -110,6 +111,8 @@ class MainWindow : public QMainWindow
     unselect_trial();
     void
     select_trial(int mat, int trial);
+    void
+    addLog(std::string log, bool timestamp = false);
 
     Ui::MainWindow *ui;
     //vector of material name
@@ -130,12 +133,19 @@ class MainWindow : public QMainWindow
     //timer to update the time and motion during the trial
     QTimer *m_timer;
     int m_time;
+    int m_timeMax = 60000; //in miliseconds
+    int m_timeStep = 100;   //in miliseconds
     bool m_trialInProgress = false;
 
+    std::vector<std::string> m_availableStreams;
     //LSL stream toeceive finger_pos data
     lsl::stream_inlet *m_inlet_finger_pos = nullptr;
     //LSL stream toeceive loadcells data
     lsl::stream_inlet *m_inlet_loadcells = nullptr;
+
+    lsl::stream_outlet *m_outlet_trigger = nullptr;
+
+    std::string m_commentLog_fileName;
 
     //scene to display the motion
     QGraphicsScene *m_scene;

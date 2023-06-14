@@ -2,33 +2,20 @@
 #include "../forms/ui_mainwindow.h"
 #include "lsl_cpp.h"
 #include <QComboBox>
+#include <QDateTime>
 #include <QFile>
+
+#include <fstream>
+#include <regex>
+#include <unistd.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->label_matName;
-    ui->label_trialID;
-    ui->lineEdit_userName;
-    ui->treeWidget_mat;
-    ui->pushButton_userName;
-    ui->pushButton_comment;
-    ui->pushButton_finger_pos;
-    ui->pushButton_kistler;
-    ui->pushButton_loadcells;
-    ui->pushButton_matRandom;
-    ui->pushButton_matSelect;
-    ui->pushButton_nbTrial;
-    ui->pushButton_startTrial;
-    ui->pushButton_endTrial;
-    ui->pushButton_matLoad;
-    ui->lcdNumber_timer;
-    ui->spinBox_nbTrial;
-    ui->graphicsView_motion;
 
     // set the timer to 60 seconds
-    ui->lcdNumber_timer->display(60);
+    ui->lcdNumber_timer->display(m_timeMax / 1000);
 
     // set the number of trial to 5
     ui->spinBox_nbTrial->setValue(5);
@@ -71,19 +58,24 @@ MainWindow::MainWindow(QWidget *parent)
         {
             std::cout << "stream name: " << results[i].name() << std::endl;
             if(results[i].name() == "kistler")
+            {
                 ui->pushButton_kistler->setIcon(
                     QIcon::fromTheme("user-available"));
+                m_availableStreams.push_back(results[i].name());
+            }
             if(results[i].name() == "loadcells")
             {
                 ui->pushButton_loadcells->setIcon(
                     QIcon::fromTheme("user-available"));
                 lsl::stream_inlet inlet(results[i], 360, 0, false);
+                m_availableStreams.push_back(results[i].name());
             }
-            if(results[i].name() == "finger_pos")
+            if(results[i].name() == "positions")
             {
                 ui->pushButton_finger_pos->setIcon(
                     QIcon::fromTheme("user-available"));
-                m_inlet_finger_pos = new lsl::stream_inlet(results[i]);
+                m_inlet_finger_pos = new lsl::stream_inlet(results[i], 1);
+                m_availableStreams.push_back(results[i].name());
             }
         }
     }
@@ -91,6 +83,11 @@ MainWindow::MainWindow(QWidget *parent)
     {
         std::cout << "No stream found" << std::endl;
     }
+
+    //create a trigger outlet lsl stream with name "trigger" and format cf_string with 2 channels
+    lsl::stream_info info = lsl::stream_info(
+        "trigger", "command", 2, 0, lsl::cf_string, "myuniquesourceid23443");
+    m_outlet_trigger = new lsl::stream_outlet(info);
 
     // link the signal for each button to the corresponding slot
     connect(ui->pushButton_userName, SIGNAL(released()), this,
@@ -118,13 +115,20 @@ MainWindow::MainWindow(QWidget *parent)
     ui->graphicsView_motion->setScene(m_scene);
 
     // set the timer to 60 seconds
-    ui->lcdNumber_timer->display(60);
+    ui->lcdNumber_timer->display(m_timeMax / 1000);
+    ui->label_motion->setText("none");
     m_timer = new QTimer(this);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(updateTimer()));
-    m_timer->start(100);
+
+    m_timer->start(m_timeStep);
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow()
+{
+    std::vector<std::string> cmd = {"stop", "all"};
+    m_outlet_trigger->push_sample(cmd);
+    delete ui;
+}
 
 void
 MainWindow::pushButton_userName_released()
@@ -138,13 +142,12 @@ MainWindow::pushButton_userName_released()
 
     if(!ui->pushButton_matLoad->isEnabled())
         ui->pushButton_nbTrial->setEnabled(true);
-    
 }
 
 void
 MainWindow::pushButton_load_released()
 {
-   // search for a list of materials in the current directory store in a file .conf
+    // search for a list of materials in the current directory store in a file .conf
     // the file .conf is read: the materials name is separated by new line. and stored in a list
     // the list is displayed in the treeWidget_mat
     // the user can select a material by clicking on it
@@ -180,8 +183,6 @@ MainWindow::pushButton_load_released()
     ui->lineEdit_matPath->setEnabled(false);
 
     ui->pushButton_nbTrial->setEnabled(true);
-
-  
 }
 
 void
@@ -211,11 +212,40 @@ MainWindow::pushButton_nbTrial_released()
                 std::make_tuple(m_userName + "_" + item->text(0).toStdString() +
                                     "_" + child->text(0).toStdString(),
                                 "", 0));
-            std::cout << "mat: " << i << " trial: " << j
-                      << " name: " << std::get<0>(m_matTrial[i][j])
-                      << std::endl;
+            // std::cout << "mat: " << i << " trial: " << j
+            //           << " name: " << std::get<0>(m_matTrial[i][j])
+            //           << std::endl;
         }
     }
+
+    //generate a name for the log file based on the user name, the date and the time in the format dd_mm_yyyy_hh_mm_ss
+    m_commentLog_fileName = "log_" + m_userName + "_" +
+                            QDateTime::currentDateTime()
+                                .toString("dd_MM_yyyy_hh_mm_ss")
+                                .toStdString() +
+                            ".txt";
+    //replace all space by underscore
+    std::replace(m_commentLog_fileName.begin(), m_commentLog_fileName.end(),
+                 ' ', '_');
+
+    //add log of the user name and the date and time in the log file and all the material name and the number of trial
+    addLog("[HEADER]");
+    addLog("user: " + m_userName);
+    addLog("date: " + QDateTime::currentDateTime().toString().toStdString());
+    addLog("number of trial: " + std::to_string(m_nbTrial));
+    std::string matList = "";
+    for(int i = 0; i < ui->treeWidget_mat->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem *item = ui->treeWidget_mat->topLevelItem(i);
+        matList += item->text(0).toStdString() + " ";
+    }
+    addLog("materials: [" + matList + "\b]");
+    std::string streams = " ";
+    for(int i = 0; i < m_availableStreams.size(); i++)
+        streams += m_availableStreams[i] + " ";
+    addLog("streams: [" + matList + "\b]");
+    addLog("[LOGS]");
+
     //enable the button_matRandom and the button_matSelect
     ui->pushButton_matRandom->setEnabled(true);
     ui->pushButton_matSelect->setEnabled(true);
@@ -230,6 +260,10 @@ MainWindow::pushButton_comment_released()
     //add the comment in the treeWidget_mat
     ui->treeWidget_mat->topLevelItem(m_mat)->child(m_trial)->setText(
         1, QString(comment.c_str()));
+    //add the comment in the log file
+    addLog("(" + ui->label_trialID->text().toStdString() +
+               ") COMMENTS: " + comment,
+           true);
 }
 
 void
@@ -257,6 +291,24 @@ MainWindow::select_trial(int mat, int trial)
     ui->label_trialID->setText(QString(m_userName.c_str()) + "_" +
                                item->parent()->text(0) + "_" + item->text(0));
     ui->treeWidget_mat->setCurrentItem(item);
+    //add to the log the selected material and trial
+    addLog("SELECT: " + item->parent()->text(0).toStdString() + " | " +
+               item->text(0).toStdString(),
+           true);
+}
+
+void
+MainWindow::addLog(std::string log, bool timestamp)
+{
+    //open the log file in append mode
+    std::ofstream commentLog_file(m_commentLog_fileName, std::ofstream::app);
+    commentLog_file << (timestamp ? QDateTime::currentDateTime()
+                                            .toString("hh:mm:ss")
+                                            .toStdString() +
+                                        ": "
+                                  : "")
+                    << log << std::endl;
+    commentLog_file.close();
 }
 
 void
@@ -330,25 +382,48 @@ MainWindow::pushButton_startTrial_released()
 
     //disable the button_startTrial
     ui->pushButton_startTrial->setEnabled(false);
+    ui->pushButton_matSelect->setEnabled(false);
+    ui->pushButton_matRandom->setEnabled(false);
+
     //enable the button_endTrial
     ui->pushButton_endTrial->setEnabled(true);
+
+    //send trigger command on the m_outlet_trigger
+    std::vector<std::string> cmd = {"start",
+                                    ui->label_trialID->text().toStdString()};
+    m_outlet_trigger->push_sample(cmd);
+    //wait for 1s
+    usleep(1000000);
+
     m_time = 0;
     m_trialInProgress = true;
+    //add to the log the start of the trial
+    addLog("(" + ui->label_trialID->text().toStdString() + ") START", true);
 }
 
 void
 MainWindow::pushButton_endTrial_released()
 {
+    addLog("(" + ui->label_trialID->text().toStdString() + ") END  duration: " +
+               QString::number(m_time).toStdString() + "ms",
+           true);
     m_trialInProgress = false;
+    m_time = 0;
     //disable the button_endTrial
     ui->pushButton_endTrial->setEnabled(false);
     //enable the button_startTrial
     ui->pushButton_startTrial->setEnabled(true);
-    m_timer->stop();
+    ui->pushButton_matSelect->setEnabled(true);
+    ui->pushButton_matRandom->setEnabled(true);
+
     //set back the lcdNumber_timer
-    ui->lcdNumber_timer->display(60);
+    ui->lcdNumber_timer->display(m_timeMax / 1000);
     //set back the label_motion
     ui->label_motion->setText("none");
+    //add to the log the end of the trial
+    std::vector<std::string> cmd = {"pause",
+                                    ui->label_trialID->text().toStdString()};
+    m_outlet_trigger->push_sample(cmd);
 }
 
 void
@@ -371,52 +446,51 @@ MainWindow::updateTimer()
     if(m_inlet_finger_pos != nullptr)
     {
         //get the finger position
-        std::vector<int> finger_pos;
-        m_inlet_finger_pos->pull_sample(finger_pos);
-        if(finger_pos.size() == 2)
-        {
-            m_scene->addEllipse(finger_pos[0] - d / 2, finger_pos[1] - d / 2, d,
-                                d, penFinger_pos);
-        }
+        std::vector<std::vector<float>> finger_pos;
+        int n = finger_pos.size() - 1;
+        // if(m_inlet_finger_pos->pull_chunk(finger_pos))
+        //     m_scene->addEllipse((finger_pos[n][0] - 0.5) * a - d / 2,
+        //                         (finger_pos[n][1] - 0.5) * a - d / 2, d, d,
+        //                         penFinger_pos);
     }
 
     if(m_trialInProgress)
     {
         //update the timer
-        m_time += 5;
-        ui->lcdNumber_timer->display(60 - m_time / 10);
+        m_time += m_timeStep;
+
+        ui->lcdNumber_timer->display((m_timeMax - m_time) / 1000);
 
         //motion of a circle on the graphicsView
-
         //first 10s circle turn clockwise around the center
-        if(m_time < 100)
+        if(m_time < 10000)
         {
             ui->label_motion->setText("circle");
-            m_scene->addEllipse(D * cos(m_time / 10.0) - d / 2,
-                                D * sin(m_time / 10.0) - d / 2, d, d,
+            m_scene->addEllipse(D * cos(m_time / 1000.0) - d / 2,
+                                D * sin(m_time / 1000.0) - d / 2, d, d,
                                 penMotion);
         }
         //second 10s circle turn counter-clockwise around the center
-        else if(m_time < 200)
+        else if(m_time < 20000)
         {
             ui->label_motion->setText("circle");
-            m_scene->addEllipse(D * cos(-m_time / 10.0) - d / 2,
-                                D * sin(-m_time / 10.0) - d / 2, d, d,
+            m_scene->addEllipse(D * cos(-m_time / 1000.0) - d / 2,
+                                D * sin(-m_time / 1000.0) - d / 2, d, d,
                                 penMotion);
         }
         //third 10s circle move back and forth horizontally
-        else if(m_time < 300)
+        else if(m_time < 30000)
         {
             ui->label_motion->setText("line");
-            m_scene->addEllipse(D * cos(m_time / 10.0) - d / 2, 0 - d / 2, d, d,
-                                penMotion);
+            m_scene->addEllipse(D * cos(m_time / 1000.0) - d / 2, 0 - d / 2, d,
+                                d, penMotion);
         }
         //fourth 10s circle move back and forth vertically
-        else if(m_time < 400)
+        else if(m_time < 40000)
         {
             ui->label_motion->setText("line");
-            m_scene->addEllipse(0 - d / 2, D * sin(m_time / 10.0) - d / 2, d, d,
-                                penMotion);
+            m_scene->addEllipse(0 - d / 2, D * sin(m_time / 1000.0) - d / 2, d,
+                                d, penMotion);
         }
         else
         {
@@ -424,12 +498,14 @@ MainWindow::updateTimer()
         }
 
         //stop the timer
-        if(m_time >= 600)
+        if(m_time >= m_timeMax)
         {
             //trigger the button_endTrial
             pushButton_endTrial_released();
         }
     }
+    else
+    {
+        m_scene->addEllipse(-d / 2, -d / 2, d, d);
+    }
 }
-
-
