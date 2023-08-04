@@ -4,6 +4,7 @@
 #include <QComboBox>
 #include <QDateTime>
 #include <QFile>
+#include <QGraphicsEllipseItem>
 
 #include <fstream>
 #include <regex>
@@ -63,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
                     QIcon::fromTheme("user-available"));
                 m_availableStreams.push_back(results[i].name());
             }
-            if(results[i].name() == "loadcells")
+            if(results[i].name() == "ATI")
             {
                 ui->pushButton_loadcells->setIcon(
                     QIcon::fromTheme("user-available"));
@@ -109,10 +110,15 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButton_endTrial, SIGNAL(released()), this,
             SLOT(pushButton_endTrial_released()));
 
+    
+
     //add a circle to the graphicsView_motion
     m_scene = new QGraphicsScene();
     m_scene->addEllipse(0, 0, 100, 100);
     ui->graphicsView_motion->setScene(m_scene);
+
+    //new scene for graphicsView_gauge
+    m_scene_gauge = new QGraphicsScene();
 
     // set the timer to 60 seconds
     ui->lcdNumber_timer->display(m_timeMax / 1000);
@@ -199,19 +205,14 @@ MainWindow::pushButton_nbTrial_released()
     // the child is the list of the comments for each trial of the material
     for(int i = 0; i < ui->treeWidget_mat->topLevelItemCount(); i++)
     {
-
-        m_matTrial.push_back(
-            std::vector<std::tuple<std::string, std::string, int>>());
         QTreeWidgetItem *item = ui->treeWidget_mat->topLevelItem(i);
+        m_matTrial.push_back(std::vector<Trial *>());
         for(int j = 0; j < m_nbTrial; j++)
         {
             QTreeWidgetItem *child = new QTreeWidgetItem(item);
             child->setText(0, "trial" + QString::number(j + 1));
             child->setText(1, "");
-            m_matTrial[i].push_back(
-                std::make_tuple(m_userName + "_" + item->text(0).toStdString() +
-                                    "_" + child->text(0).toStdString(),
-                                "", 0));
+            m_matTrial[i].push_back(new Trial(m_userName, item->text(0).toStdString(), "normal", i+j*m_nbTrial,j));
             // std::cout << "mat: " << i << " trial: " << j
             //           << " name: " << std::get<0>(m_matTrial[i][j])
             //           << std::endl;
@@ -249,6 +250,12 @@ MainWindow::pushButton_nbTrial_released()
     //enable the button_matRandom and the button_matSelect
     ui->pushButton_matRandom->setEnabled(true);
     ui->pushButton_matSelect->setEnabled(true);
+
+    m_penTarget.setColor(Qt::red);
+    m_penTarget.setWidth(3);
+
+    m_penFinger.setColor(Qt::green);
+    m_penFinger.setWidth(3);
 }
 
 void
@@ -256,12 +263,12 @@ MainWindow::pushButton_comment_released()
 {
     std::string comment = ui->textEdit_comment->toPlainText().toStdString();
     // get the comment from the lineEdit_comment
-    std::get<1>(m_matTrial[m_mat][m_trial]) = comment;
+    m_currentTrial->addComment(comment);
     //add the comment in the treeWidget_mat
     ui->treeWidget_mat->topLevelItem(m_mat)->child(m_trial)->setText(
         1, QString(comment.c_str()));
     //add the comment in the log file
-    addLog("(" + ui->label_trialID->text().toStdString() +
+    addLog("(" + m_currentTrial->getName() +
                ") COMMENTS: " + comment,
            true);
 }
@@ -278,18 +285,18 @@ MainWindow::select_trial(int mat, int trial)
     }
     m_mat = ui->treeWidget_mat->indexFromItem(item->parent()).row();
     m_trial = ui->treeWidget_mat->indexFromItem(item).row();
+    m_currentTrial = m_matTrial[m_mat][m_trial];
     ui->pushButton_comment->setEnabled(true);
     ui->pushButton_startTrial->setEnabled(true);
     std::cout << "material: " << m_mat << " trial: " << m_trial << std::endl;
     //set the material in the treeWidget_mat to "user-away"
     unselect_trial();
-    if(std::get<2>(m_matTrial[m_mat][m_trial]) == 0)
+    if(m_matTrial[m_mat][m_trial]->hasBeenRecorded())
         item->setIcon(0, QIcon::fromTheme("user-available"));
     else
         item->setIcon(0, QIcon::fromTheme("user-away"));
     ui->label_matName->setText(item->parent()->text(0));
-    ui->label_trialID->setText(QString(m_userName.c_str()) + "_" +
-                               item->parent()->text(0) + "_" + item->text(0));
+    ui->label_trialID->setText(QString(m_currentTrial->getName().c_str()));
     ui->treeWidget_mat->setCurrentItem(item);
     //add to the log the selected material and trial
     addLog("SELECT: " + item->parent()->text(0).toStdString() + " | " +
@@ -355,7 +362,7 @@ MainWindow::pushButton_matRandom_released()
         for(int i = 0; i < ui->treeWidget_mat->topLevelItem(mat)->childCount();
             i++)
         {
-            if(std::get<2>(m_matTrial[mat][i]) == 0)
+            if(m_matTrial[mat][i]->hasBeenRecorded() == 0)
             {
                 trial = i;
                 break;
@@ -374,12 +381,6 @@ MainWindow::pushButton_matRandom_released()
 void
 MainWindow::pushButton_startTrial_released()
 {
-    //set the trial as done
-    std::get<2>(m_matTrial[m_mat][m_trial])++;
-    //remove the icon
-    ui->treeWidget_mat->topLevelItem(m_mat)->child(m_trial)->setText(
-        2, QString::number(std::get<2>(m_matTrial[m_mat][m_trial])));
-
     //disable the button_startTrial
     ui->pushButton_startTrial->setEnabled(false);
     ui->pushButton_matSelect->setEnabled(false);
@@ -392,6 +393,8 @@ MainWindow::pushButton_startTrial_released()
     std::vector<std::string> cmd = {"start",
                                     ui->label_trialID->text().toStdString()};
     m_outlet_trigger->push_sample(cmd);
+    //display "wait"
+    ui->label_trialID->setText("Wait");
     //wait for 1s
     usleep(1000000);
 
@@ -407,6 +410,12 @@ MainWindow::pushButton_endTrial_released()
     addLog("(" + ui->label_trialID->text().toStdString() + ") END  duration: " +
                QString::number(m_time).toStdString() + "ms",
            true);
+    ui->treeWidget_mat->topLevelItem(m_mat)->child(m_trial)->setText(
+        2, QString::number(m_time).toStdString().c_str());
+
+    //set the trial as done
+    m_matTrial[m_mat][m_trial]->setRecorded();
+
     m_trialInProgress = false;
     m_time = 0;
     //disable the button_endTrial
@@ -431,18 +440,17 @@ MainWindow::updateTimer()
 {
     // clear the scene
     m_scene->clear();
-    int d = 100;
-    int D = 200;
-    int a = 500;
-    //motion circle color
-    QPen penMotion;
-    penMotion.setColor(Qt::red);
-    penMotion.setWidth(3);
+    
     QPen penFinger_pos;
     penFinger_pos.setColor(Qt::blue);
     penFinger_pos.setWidth(3);
+    double speed = 0.1;
+    int load = 100;
+    int targetLoad = 100;
+    int rangeLoad = 100;
 
-    m_scene->addRect(-a / 2, -a / 2, a, a);
+    m_scene->addRect(-m_sizeTexture / 2, -m_sizeTexture / 2, m_sizeTexture,
+                     m_sizeTexture, penFinger_pos);
     if(m_inlet_finger_pos != nullptr)
     {
         //get the finger position
@@ -457,46 +465,57 @@ MainWindow::updateTimer()
     if(m_trialInProgress)
     {
         //update the timer
-        m_time += m_timeStep;
+        m_time += m_timeStep*3;
 
         ui->lcdNumber_timer->display((m_timeMax - m_time) / 1000);
 
-        //motion of a circle on the graphicsView
-        //first 10s circle turn clockwise around the center
-        if(m_time < 10000)
-        {
-            ui->label_motion->setText("circle");
-            m_scene->addEllipse(D * cos(m_time / 1000.0) - d / 2,
-                                D * sin(m_time / 1000.0) - d / 2, d, d,
-                                penMotion);
-        }
-        //second 10s circle turn counter-clockwise around the center
-        else if(m_time < 20000)
-        {
-            ui->label_motion->setText("circle");
-            m_scene->addEllipse(D * cos(-m_time / 1000.0) - d / 2,
-                                D * sin(-m_time / 1000.0) - d / 2, d, d,
-                                penMotion);
-        }
-        //third 10s circle move back and forth horizontally
-        else if(m_time < 30000)
-        {
-            ui->label_motion->setText("line");
-            m_scene->addEllipse(D * cos(m_time / 1000.0) - d / 2, 0 - d / 2, d,
-                                d, penMotion);
-        }
-        //fourth 10s circle move back and forth vertically
-        else if(m_time < 40000)
-        {
-            ui->label_motion->setText("line");
-            m_scene->addEllipse(0 - d / 2, D * sin(m_time / 1000.0) - d / 2, d,
-                                d, penMotion);
-        }
-        else
+        //phase1: free motion
+        //phase2: circle motion clockwise
+        //phase3: circle motion counterclockwise
+        //phase4: linear motion horizontal
+        //phase5: linear motion vertical
+
+        //if trial number is < 3, do pattern display
+        //if trial number is == 3, do pattern display and gauge display
+        //if trial number is == 4, do target display
+
+        ui->graphicsView_gauge->hide();
+
+        if(m_time < 16000)
         {
             ui->label_motion->setText("freestyle");
         }
+        else if(m_time < 38000)
+        {
+            if(m_time < 27000)
+                speed = -speed;
+            if(m_trial < 4)
+            {
+                displayPatternCircle(0.8*m_sizeTexture/2, speed);
+                if(m_trial == 3)
+                    displayLoadGauge(load, targetLoad, rangeLoad);
+            }
+            if(m_trial == 4)
+                moveTargetCircle(m_time, speed, 0.8*m_sizeTexture/2);
+        }
+        else
+        {
+            int w = 0.8*m_sizeTexture;
+            int h = 0.8*m_sizeTexture;
+            if(m_time < 49000)
+                w = 0;
+            else 
+                h = 0;
 
+            if(m_trial < 4)
+            {
+                displayPatternRectangle(w, h);
+                if(m_trial == 3)
+                    displayLoadGauge(load, targetLoad, rangeLoad);
+            }
+            if(m_trial == 4)
+                moveTargetRectangle(m_time, speed, w, h);
+        }
         //stop the timer
         if(m_time >= m_timeMax)
         {
@@ -506,6 +525,141 @@ MainWindow::updateTimer()
     }
     else
     {
-        m_scene->addEllipse(-d / 2, -d / 2, d, d);
+        m_scene->addEllipse(-m_sizeTarget / 2, -m_sizeTarget / 2, m_sizeTarget,
+                            m_sizeTarget, m_penTarget);
     }
+}
+
+void
+MainWindow::moveTargetCircle(double dt, double speed, double radius)
+{
+    ui->label_motion->setText("Follow the target");
+    m_scene->addEllipse(
+        radius * cos(speed * 2 * M_PI * m_time / 1000.0) - m_sizeTarget / 2,
+        radius * sin(speed * 2 * M_PI * m_time / 1000.0) - m_sizeTarget / 2,
+        m_sizeTarget, m_sizeTarget, m_penTarget);
+}
+
+void
+MainWindow::moveTargetRectangle(double dt,
+                                double speed,
+                                double width,
+                                double height)
+{
+    ui->label_motion->setText("Follow the target");
+    //display a circle target moving in a rectangular pattern
+    //ratio of the width and height of the rectangle
+    double angleTime = speed * 2 * M_PI * m_time / 1000.0;
+    double cosAngleTime = cos(angleTime);
+    double signCosAngleTime = cosAngleTime / abs(cosAngleTime);
+
+    if(width == 0)
+        width = 0.0001;
+    if(height == 0)
+        height = 0.0001;
+
+    double hyp = sqrt(pow(width / 2, 2) + pow(height / 2, 2));
+    double cosAngle = signCosAngleTime * width / (2 * hyp);
+    double sinAngle = signCosAngleTime * height / (2 * hyp);
+
+    double x, y;
+    if(abs(cosAngleTime) > abs(cosAngle))
+    {
+        x = hyp * cosAngle;
+        y = hyp * sin(angleTime);
+    }
+    else
+    {
+        x = hyp * cos(angleTime);
+        y = hyp * sinAngle;
+    }
+    m_scene->addEllipse(x - m_sizeTarget / 2, y - m_sizeTarget / 2, m_sizeTarget,
+                        m_sizeTarget, m_penTarget);
+}
+
+void
+MainWindow::displayLoadGauge(double load, double targetLoad, double range)
+{
+    ui->graphicsView_gauge->show();
+    //add a color gradient to the scene
+    int h = ui->graphicsView_gauge->height();
+    int w = ui->graphicsView_gauge->width();
+    int o = 2;
+    int l = range;
+    int thickness = 2;
+    int load_value = load;
+    QLinearGradient gradient(0, -h / 2, 0, h / 2);
+    gradient.setColorAt(0, Qt::red);
+    gradient.setColorAt(0.25, Qt::yellow);
+    gradient.setColorAt(0.5, Qt::green);
+    gradient.setColorAt(0.75, Qt::yellow);
+    gradient.setColorAt(1, Qt::red);
+
+    //add a rectangle to the scene withou border and with the gradient
+    m_scene_gauge->addRect(-w / 2, -h / 2, w - o, h - o, QPen(Qt::NoPen),
+                           QBrush(gradient));
+    //add two lines to the scene to limit the gauge on the y axis
+    m_scene_gauge->addLine(-w / 2 + thickness / 2, targetLoad + l,
+                           w / 2 - o - thickness / 2, targetLoad + l,
+                           QPen(Qt::black, thickness));
+    m_scene_gauge->addLine(-w / 2 + thickness / 2, targetLoad - l,
+                           w / 2 - o - thickness / 2, targetLoad - l,
+                           QPen(Qt::black, thickness));
+    //add a circle to the scene to display the load value
+    m_scene_gauge->addEllipse(-w / 2, load_value, w - o, w - o, QPen(Qt::NoPen),
+                              QBrush(Qt::black));
+    ui->graphicsView_gauge->setScene(m_scene_gauge);
+}
+
+void
+MainWindow::displayPatternCircle(double radius, double direction)
+{
+    ui->label_motion->setText("Follow the pattern");
+    //display a empty circle with a grey border of thickness m_sizeTarget
+    m_scene->addEllipse(-radius, -radius, 2 * radius, 2 * radius,
+                        QPen(Qt::gray, m_sizeTarget));
+    //add a curved arrow to the scene
+    double scale = 0.5;
+    int arrowWidth = 10;
+    m_arrow = new QGraphicsEllipseItem();
+    m_scene->addItem(m_arrow);
+    m_arrow->setRect(-radius*scale, -radius*scale, 2*radius*scale, 2*radius*scale);
+    m_arrow->setStartAngle(0);
+    m_arrow->setSpanAngle(16*90);
+    m_arrow->setPen(QPen(Qt::blue, 10));
+    //add a filled circle to the scene
+    m_scene->addEllipse(-radius*scale+arrowWidth/2, -radius*scale+arrowWidth/2, 2*radius*scale-arrowWidth, 2*radius*scale-arrowWidth,
+                        QPen(Qt::NoPen), QBrush(Qt::white));
+    
+    //add a polygon in triangle shape to the scene
+    //the triangle is pointing in the direction of the movement
+    QPolygonF triangle;
+    int triangleSize = 10;
+    std::cout << direction << std::endl;
+    if(direction >0)
+    {
+        triangle << QPointF(0, -radius*scale-triangleSize);
+        triangle << QPointF(0, -radius*scale+triangleSize);
+        triangle << QPointF(-triangleSize, -radius*scale);
+    }
+    else
+    {
+        triangle << QPointF(radius*scale-triangleSize, 0);
+        triangle << QPointF(radius*scale+triangleSize, 0);
+        triangle << QPointF(radius*scale, triangleSize);
+    }
+    m_scene->addPolygon(triangle, QPen(Qt::blue, 2), QBrush(Qt::blue));
+    std::cout << direction << std::endl;
+
+    
+
+}
+
+void
+MainWindow::displayPatternRectangle(double width, double height)
+{
+    ui->label_motion->setText("Follow the pattern");
+    //display a empty rectangle with a grey border of thickness m_sizeTarget
+    m_scene->addRect(-width / 2, -height / 2, width, height,
+                     QPen(Qt::gray, m_sizeTarget));
 }

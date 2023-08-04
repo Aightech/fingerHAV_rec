@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1219</width>
+    <width>1245</width>
     <height>696</height>
    </rect>
   </property>
@@ -309,7 +309,7 @@
         <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>Load cells</string>
+           <string>Load ATI</string>
           </property>
          </widget>
         </item>
@@ -409,6 +409,22 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_motion">
+       <property name="font">
+        <font>
+         <pointsize>20</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Line</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="0">
       <widget class="QGraphicsView" name="graphicsView_motion">
        <property name="sizePolicy">
@@ -425,19 +441,37 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_motion">
-       <property name="font">
-        <font>
-         <pointsize>20</pointsize>
-         <bold>true</bold>
-        </font>
+     <item row="1" column="1">
+      <widget class="QGraphicsView" name="graphicsView_gauge">
+       <property name="minimumSize">
+        <size>
+         <width>20</width>
+         <height>600</height>
+        </size>
        </property>
-       <property name="text">
-        <string>Line</string>
+       <property name="maximumSize">
+        <size>
+         <width>20</width>
+         <height>600</height>
+        </size>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
+       <property name="backgroundBrush">
+        <brush brushstyle="NoBrush">
+         <color alpha="255">
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
+         </color>
+        </brush>
+       </property>
+       <property name="foregroundBrush">
+        <brush brushstyle="NoBrush">
+         <color alpha="255">
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
+         </color>
+        </brush>
        </property>
       </widget>
      </item>

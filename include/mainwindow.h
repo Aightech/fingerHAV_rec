@@ -22,9 +22,48 @@
 #include <iostream>
 #include <numeric>
 #include <pthread.h>
+#include <string>
 #include <tuple>
 #include <utility>
-#include <string>
+
+class Trial
+{
+    public:
+    Trial(std::string userName, std::string texture, std::string type, int gid, int matid)
+        : m_userName(userName), m_texture(texture), m_type(type), m_gid(gid), m_matid(matid)
+    {
+        m_name = m_userName + "_" + m_texture + "_" + m_type + "_" + std::to_string(m_gid) + "_" + std::to_string(m_matid);
+    }
+    ~Trial() {}
+    void addComment(std::string comment)
+    {
+        m_comment = comment;
+    }
+
+    std::string getName()
+    {
+        return m_name;
+    }
+
+    bool hasBeenRecorded()
+    {
+        return m_recorded;
+    }
+
+    void setRecorded()
+    {
+        m_recorded = true;
+    }
+
+    std::string m_name;
+    std::string m_texture;
+    std::string m_type;
+    std::string m_comment;
+    std::string m_userName;
+    bool m_recorded = false;
+    int m_gid;
+    int m_matid;
+};
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -47,6 +86,18 @@ class MainWindow : public QMainWindow
     public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    //functions to call every dt, depending on the phase and type of the trial
+    void
+    moveTargetCircle(double dt, double speed, double radius);
+    void
+    moveTargetRectangle(double dt, double speed, double width, double height);
+    void
+    displayLoadGauge(double load, double targetLoad, double range);
+    void
+    displayPatternCircle(double radius, double direction);
+    void
+    displayPatternRectangle(double width, double height);
 
     private slots:
     void
@@ -104,7 +155,8 @@ class MainWindow : public QMainWindow
     /**
      * @brief Load the material configuration file.
      */
-  void pushButton_load_released();
+    void
+    pushButton_load_released();
 
     private:
     void
@@ -122,19 +174,17 @@ class MainWindow : public QMainWindow
     //number of trial for each material
     int m_nbTrial;
     //vector of trial for each material [trialID, comment, nbTrial]
-    std::vector<std::vector<std::tuple<std::string, std::string, int>>>
-        m_matTrial;
-
-    //current material
+    std::vector<std::vector<Trial *>> m_matTrial;
+    Trial *m_currentTrial;
+    int m_currentTrialIndex;
     int m_mat;
-    //current trial
     int m_trial;
 
     //timer to update the time and motion during the trial
     QTimer *m_timer;
     int m_time;
     int m_timeMax = 60000; //in miliseconds
-    int m_timeStep = 100;   //in miliseconds
+    int m_timeStep = 100;  //in miliseconds
     bool m_trialInProgress = false;
 
     std::vector<std::string> m_availableStreams;
@@ -149,5 +199,14 @@ class MainWindow : public QMainWindow
 
     //scene to display the motion
     QGraphicsScene *m_scene;
+    //scene to display the load gauge
+    QGraphicsScene *m_scene_gauge;
+
+    QGraphicsEllipseItem* m_arrow;
+
+    QPen m_penFinger;
+    QPen m_penTarget;
+    int m_sizeTexture = 500;
+    int m_sizeTarget = 50;
 };
 #endif // MAINWINDOW_H
