@@ -1,5 +1,5 @@
 set(EXEC_NAME fingerHAV_rec)
-set(PROJECT_VERSION 2.4)
+set(PROJECT_VERSION 2.5)
 
 ###### Special libraries ######
 set(EXTRA_LIBS "")

@@ -1,0 +1,48 @@
+[HEADER]
+user: giada
+date: Fri Aug 11 20:05:57 2023
+number of trial: 5
+materials: [7t 10t 18t 39t 44t 54t 59t 83t 108t 120t ]
+streams: [7t 10t 18t 39t 44t 54t 59t 83t 108t 120t ]
+[LOGS]
+20:07:15: SELECT: 39t | trial4
+20:07:18: SELECT: 59t | trial3
+20:07:19: SELECT: 83t | trial3
+20:07:20: SELECT: 54t | trial3
+20:07:21: SELECT: 39t | trial4
+20:07:22: SELECT: 54t | trial3
+20:07:22: SELECT: 59t | trial3
+20:07:22: SELECT: 18t | trial3
+20:07:23: SELECT: 120t | trial3
+20:07:23: SELECT: 10t | trial2
+20:07:23: SELECT: 18t | trial3
+20:07:23: SELECT: 83t | trial3
+20:07:23: SELECT: 7t | trial2
+20:07:24: SELECT: 120t | trial3
+20:07:24: SELECT: 39t | trial4
+20:07:24: SELECT: 59t | trial3
+20:07:24: SELECT: 7t | trial2
+20:07:25: SELECT: 59t | trial3
+20:07:25: SELECT: 18t | trial3
+20:07:25: SELECT: 59t | trial3
+20:07:25: SELECT: 10t | trial2
+20:07:25: SELECT: 108t | trial1
+20:07:25: SELECT: 83t | trial3
+20:07:26: SELECT: 120t | trial3
+20:07:26: SELECT: 18t | trial3
+20:07:26: SELECT: 7t | trial2
+20:07:26: SELECT: 18t | trial3
+20:07:26: SELECT: 39t | trial4
+20:07:26: SELECT: 83t | trial3
+20:07:27: SELECT: 54t | trial3
+20:07:27: SELECT: 120t | trial3
+20:07:27: SELECT: 18t | trial3
+20:07:27: SELECT: 18t | trial3
+20:07:27: SELECT: 108t | trial1
+20:07:27: SELECT: 120t | trial3
+20:07:28: SELECT: 83t | trial3
+20:07:28: SELECT: 39t | trial4
+20:07:28: SELECT: 59t | trial3
+20:07:28: SELECT: 10t | trial2
+20:07:29: SELECT: 18t | trial3
+20:07:29: SELECT: 120t | trial3

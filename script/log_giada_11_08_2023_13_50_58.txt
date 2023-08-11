@@ -1,0 +1,55 @@
+[HEADER]
+user: giada
+date: Fri Aug 11 13:50:58 2023
+number of trial: 5
+materials: [7t 10t 18t 39t 44t 54t 59t 83t 108t 120t ]
+streams: [7t 10t 18t 39t 44t 54t 59t 83t 108t 120t ]
+[LOGS]
+13:51:00: SELECT: 39t | trial1
+13:51:20: (giada_39t_std_0) START
+13:52:20: (giada_39t_std_0) END  duration: 60000ms
+13:52:41: SELECT: 59t | trial1
+13:53:14: (giada_59t_std_0) START
+13:54:13: (giada_59t_std_0) END  duration: 60000ms
+13:55:16: SELECT: 83t | trial1
+13:55:40: (giada_83t_std_0) START
+13:56:40: (giada_83t_std_0) END  duration: 60000ms
+13:57:14: SELECT: 54t | trial1
+13:57:32: (giada_54t_std_0) START
+13:57:52: (giada_54t_std_0) END  duration: 20600ms
+14:00:37: (giada_54t_std_0) START
+14:01:36: (giada_54t_std_0) END  duration: 60000ms
+14:01:43: SELECT: 39t | trial2
+14:02:08: (giada_39t_std_1) START
+14:03:08: (giada_39t_std_1) END  duration: 60000ms
+14:04:00: SELECT: 54t | trial2
+14:04:12: (giada_54t_std_1) START
+14:05:12: (giada_54t_std_1) END  duration: 60000ms
+14:05:16: SELECT: 59t | trial2
+14:05:33: (giada_59t_std_1) START
+14:06:33: (giada_59t_std_1) END  duration: 60000ms
+14:06:35: SELECT: 18t | trial1
+14:07:13: (giada_18t_std_0) START
+14:08:12: (giada_18t_std_0) END  duration: 60000ms
+14:08:17: SELECT: 120t | trial1
+14:08:45: (giada_120t_std_0) START
+14:09:45: (giada_120t_std_0) END  duration: 60000ms
+14:09:49: SELECT: 10t | trial1
+14:10:28: (giada_10t_std_0) START
+14:11:28: (giada_10t_std_0) END  duration: 60000ms
+14:11:30: SELECT: 18t | trial2
+14:11:52: (giada_18t_std_1) START
+14:12:52: (giada_18t_std_1) END  duration: 60000ms
+14:12:55: SELECT: 83t | trial2
+14:13:23: (giada_83t_std_1) START
+14:14:23: (giada_83t_std_1) END  duration: 60000ms
+14:14:26: SELECT: 7t | trial1
+14:14:55: (giada_7t_std_0) START
+14:15:54: (giada_7t_std_0) END  duration: 60000ms
+14:16:03: SELECT: 120t | trial2
+14:16:27: (giada_120t_std_1) START
+14:17:27: (giada_120t_std_1) END  duration: 60000ms
+14:17:28: SELECT: 39t | trial3
+14:17:59: (giada_39t_std_2) START
+14:18:58: (giada_39t_std_2) END  duration: 60000ms
+14:19:01: SELECT: 59t | trial3

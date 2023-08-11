@@ -58,24 +58,26 @@ MainWindow::MainWindow(QWidget *parent)
         for(int i = 0; i < results.size(); i++)
         {
             std::cout << "stream name: " << results[i].name() << std::endl;
-            if(results[i].name() == "kistler")
+            if(results[i].name() == "Kistler")
             {
                 ui->pushButton_kistler->setIcon(
                     QIcon::fromTheme("user-available"));
                 m_availableStreams.push_back(results[i].name());
             }
-            if(results[i].name() == "ATI")
+            if(results[i].name() == "FT_sensor")
             {
                 ui->pushButton_loadcells->setIcon(
                     QIcon::fromTheme("user-available"));
-                lsl::stream_inlet inlet(results[i], 360, 0, false);
+                m_inlet_loadcells =
+                    new lsl::stream_inlet(results[i], 2, 3, false);
                 m_availableStreams.push_back(results[i].name());
             }
             if(results[i].name() == "positions")
             {
                 ui->pushButton_finger_pos->setIcon(
                     QIcon::fromTheme("user-available"));
-                m_inlet_finger_pos = new lsl::stream_inlet(results[i], 1);
+                m_inlet_finger_pos =
+                    new lsl::stream_inlet(results[i], 2, 1, false);
                 m_availableStreams.push_back(results[i].name());
             }
         }
@@ -97,6 +99,8 @@ MainWindow::MainWindow(QWidget *parent)
             SLOT(pushButton_userName_released()));
     connect(ui->pushButton_matLoad, SIGNAL(released()), this,
             SLOT(pushButton_load_released()));
+    connect(ui->pushButton_log_load, SIGNAL(released()), this,
+            SLOT(pushButton_load_log_released()));
     connect(ui->pushButton_comment, SIGNAL(released()), this,
             SLOT(pushButton_comment_released()));
     connect(ui->pushButton_matSelect, SIGNAL(released()), this,
@@ -109,8 +113,8 @@ MainWindow::MainWindow(QWidget *parent)
             SLOT(pushButton_startTrial_released()));
     connect(ui->pushButton_endTrial, SIGNAL(released()), this,
             SLOT(pushButton_endTrial_released()));
-
-    
+    connect(ui->pushButton_tare, SIGNAL(released()), this,
+            SLOT(pushButton_tare_released()));
 
     //add a circle to the graphicsView_motion
     m_scene = new QGraphicsScene();
@@ -119,6 +123,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     //new scene for graphicsView_gauge
     m_scene_gauge = new QGraphicsScene();
+    //hide the scrollbars
+    ui->graphicsView_gauge->setHorizontalScrollBarPolicy(
+        Qt::ScrollBarAlwaysOff);
+    ui->graphicsView_gauge->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     // set the timer to 60 seconds
     ui->lcdNumber_timer->display(m_timeMax / 1000);
@@ -191,6 +199,64 @@ MainWindow::pushButton_load_released()
     ui->pushButton_nbTrial->setEnabled(true);
 }
 
+void MainWindow::pushButton_load_log_released()
+{
+    //load the log file in ui->lineEdit_log_load
+    QString fileName = ui->lineEdit_load_log->text();
+    QFile file(fileName);
+    std::cout << "file name: " << fileName.toStdString() << std::endl;
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        std::cout << "Error: file " << fileName.toStdString() << " not found"
+                  << std::endl;
+        return;
+    }
+    // read the file and check if trial were already made
+    //a ex: 11:27:05: (alexis_44t_cte_speed_4) END  duration: 60000ms
+    //user name: alexis
+    //material name: 44t
+    //trial type: cte_speed
+    //trial number: 4
+    //trial duration: 60000ms
+    
+    //for each trial done with a duration of 60000ms, check if material name is in m_matTrial, if so set as done
+    QTextStream in(&file);
+    QStringList list;
+    while(!in.atEnd()) list << in.readLine();
+    file.close();
+
+    for(int i=0; i<list.size(); i++)
+    {
+        QString line = list.at(i);
+        
+        std::string line_std = line.toStdString();
+        if(line_std.find("END") != std::string::npos)
+        {
+            QStringList line_split = line.split(" ");
+            QString mat_name = line_split.at(1);
+            //remove the parenthesis
+            mat_name = mat_name.mid(1, mat_name.size()-2);
+            QString trial_duration = line_split.at(5);
+            if(trial_duration == "60000ms")
+            {
+                for(int j=0; j<m_matTrial.size(); j++)
+                {
+                    for(int k=0; k<m_matTrial[j].size(); k++)
+                    {
+                        if(m_matTrial[j][k]->getName() == mat_name.toStdString())
+                        {
+                           m_matTrial[j][k]->setRecorded();
+                           ui->treeWidget_mat->topLevelItem(j)->child(k)->setText(
+        2, QString::number(6000).toStdString().c_str());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
+
 void
 MainWindow::pushButton_nbTrial_released()
 {
@@ -212,7 +278,14 @@ MainWindow::pushButton_nbTrial_released()
             QTreeWidgetItem *child = new QTreeWidgetItem(item);
             child->setText(0, "trial" + QString::number(j + 1));
             child->setText(1, "");
-            m_matTrial[i].push_back(new Trial(m_userName, item->text(0).toStdString(), "normal", i+j*m_nbTrial,j));
+            std::string type = "std";
+            if(j == 3)
+                type = "cte_force";
+            if(j == 4)
+                type = "cte_speed";
+            m_matTrial[i].push_back(new Trial(m_userName,
+                                              item->text(0).toStdString(), type,
+                                              i + j * m_nbTrial, j));
             // std::cout << "mat: " << i << " trial: " << j
             //           << " name: " << std::get<0>(m_matTrial[i][j])
             //           << std::endl;
@@ -268,9 +341,7 @@ MainWindow::pushButton_comment_released()
     ui->treeWidget_mat->topLevelItem(m_mat)->child(m_trial)->setText(
         1, QString(comment.c_str()));
     //add the comment in the log file
-    addLog("(" + m_currentTrial->getName() +
-               ") COMMENTS: " + comment,
-           true);
+    addLog("(" + m_currentTrial->getName() + ") COMMENTS: " + comment, true);
 }
 
 void
@@ -394,7 +465,10 @@ MainWindow::pushButton_startTrial_released()
                                     ui->label_trialID->text().toStdString()};
     m_outlet_trigger->push_sample(cmd);
     //display "wait"
-    ui->label_trialID->setText("Wait");
+    //ui->label_trialID->setText("Wait");
+    //ui->label_motion->setText("Wait");
+    //show
+    ui->label_motion->show();
     //wait for 1s
     usleep(1000000);
 
@@ -415,6 +489,22 @@ MainWindow::pushButton_endTrial_released()
 
     //set the trial as done
     m_matTrial[m_mat][m_trial]->setRecorded();
+
+    //count number of trial done
+    int trialDone = 0;
+    for(int i = 0; i < m_matTrial.size(); i++)
+    {
+        for(int j = 0; j < m_matTrial[i].size(); j++)
+        {
+            if(m_matTrial[i][j]->hasBeenRecorded() == 1)
+                trialDone++;
+        }
+    }
+    //add log saying the number of trial done
+    addLog("TRIAL DONE: " + QString::number(trialDone).toStdString() + "/" +
+               QString::number(m_matTrial.size() * m_matTrial[0].size())
+                   .toStdString(),
+           true);
 
     m_trialInProgress = false;
     m_time = 0;
@@ -440,32 +530,33 @@ MainWindow::updateTimer()
 {
     // clear the scene
     m_scene->clear();
-    
-    QPen penFinger_pos;
-    penFinger_pos.setColor(Qt::blue);
-    penFinger_pos.setWidth(3);
-    double speed = 0.1;
-    int load = 100;
-    int targetLoad = 100;
-    int rangeLoad = 100;
+
+    double speed = 0.3;
+    double targetLoad = -1.3;
+    double rangeLoad = 0.5;
+    double max_load = 0;
+    double min_load = -6;
 
     m_scene->addRect(-m_sizeTexture / 2, -m_sizeTexture / 2, m_sizeTexture,
-                     m_sizeTexture, penFinger_pos);
-    if(m_inlet_finger_pos != nullptr)
+                     m_sizeTexture, QPen(Qt::black), QBrush(Qt::white));
+
+    if(m_inlet_loadcells != nullptr)
     {
-        //get the finger position
-        std::vector<std::vector<float>> finger_pos;
-        int n = finger_pos.size() - 1;
-        // if(m_inlet_finger_pos->pull_chunk(finger_pos))
-        //     m_scene->addEllipse((finger_pos[n][0] - 0.5) * a - d / 2,
-        //                         (finger_pos[n][1] - 0.5) * a - d / 2, d, d,
-        //                         penFinger_pos);
+        //get the loadcells data
+        std::vector<std::vector<float>> loadcells;
+        if(m_inlet_loadcells->pull_chunk(loadcells))
+        {
+            //get the load
+            m_load = loadcells[0][2];
+        }
     }
+    // displayLoadGauge(m_load - m_tare, targetLoad, rangeLoad, max_load,
+    //                  min_load);
 
     if(m_trialInProgress)
     {
         //update the timer
-        m_time += m_timeStep*3;
+        m_time += m_timeStep;
 
         ui->lcdNumber_timer->display((m_timeMax - m_time) / 1000);
 
@@ -479,7 +570,8 @@ MainWindow::updateTimer()
         //if trial number is == 3, do pattern display and gauge display
         //if trial number is == 4, do target display
 
-        ui->graphicsView_gauge->hide();
+        if(m_trial != 3 || m_time < 16000)
+            ui->graphicsView_gauge->hide();
 
         if(m_time < 16000)
         {
@@ -491,27 +583,29 @@ MainWindow::updateTimer()
                 speed = -speed;
             if(m_trial < 4)
             {
-                displayPatternCircle(0.8*m_sizeTexture/2, speed);
+                displayPatternCircle(0.8 * m_sizeTexture / 2, speed);
                 if(m_trial == 3)
-                    displayLoadGauge(load, targetLoad, rangeLoad);
+                    displayLoadGauge(m_load - m_tare, targetLoad, rangeLoad,
+                                     max_load, min_load);
             }
             if(m_trial == 4)
-                moveTargetCircle(m_time, speed, 0.8*m_sizeTexture/2);
+                moveTargetCircle(m_time, speed, 0.8 * m_sizeTexture / 2);
         }
         else
         {
-            int w = 0.8*m_sizeTexture;
-            int h = 0.8*m_sizeTexture;
+            int w = 0.8 * m_sizeTexture;
+            int h = 0.8 * m_sizeTexture;
             if(m_time < 49000)
                 w = 0;
-            else 
+            else
                 h = 0;
 
             if(m_trial < 4)
             {
                 displayPatternRectangle(w, h);
                 if(m_trial == 3)
-                    displayLoadGauge(load, targetLoad, rangeLoad);
+                    displayLoadGauge(m_load - m_tare, targetLoad, rangeLoad,
+                                     max_load, min_load);
             }
             if(m_trial == 4)
                 moveTargetRectangle(m_time, speed, w, h);
@@ -527,6 +621,28 @@ MainWindow::updateTimer()
     {
         m_scene->addEllipse(-m_sizeTarget / 2, -m_sizeTarget / 2, m_sizeTarget,
                             m_sizeTarget, m_penTarget);
+    }
+    if(m_inlet_finger_pos != nullptr)
+    {
+        //get the finger position
+        std::vector<std::vector<float>> finger_pos;
+        QBrush brush = QBrush(Qt::red);
+        if(m_inlet_finger_pos->pull_chunk(finger_pos))
+        {
+            if(abs(finger_pos[0][0]) < 1.2 && abs(finger_pos[0][1]) < 1.2)
+            {
+                m_last_finger_pos[0] = finger_pos[0][0];
+                m_last_finger_pos[1] = finger_pos[0][1];
+                brush.setColor(Qt::green);
+            }
+            printf("finger pos: [%d]\n", finger_pos.size());
+        }
+        double x = (m_last_finger_pos[0] - 0.5) * m_sizeTexture;
+        double y = (m_last_finger_pos[1] - 0.5) * m_sizeTexture;
+
+        m_scene->addEllipse(x - m_sizeTarget / 2, y - m_sizeTarget / 2,
+                            m_sizeTarget * 0.9, m_sizeTarget * 0.9, m_penFinger,
+                            brush);
     }
 }
 
@@ -573,41 +689,52 @@ MainWindow::moveTargetRectangle(double dt,
         x = hyp * cos(angleTime);
         y = hyp * sinAngle;
     }
-    m_scene->addEllipse(x - m_sizeTarget / 2, y - m_sizeTarget / 2, m_sizeTarget,
-                        m_sizeTarget, m_penTarget);
+    m_scene->addEllipse(x - m_sizeTarget / 2, y - m_sizeTarget / 2,
+                        m_sizeTarget, m_sizeTarget, m_penTarget);
 }
 
 void
-MainWindow::displayLoadGauge(double load, double targetLoad, double range)
+MainWindow::displayLoadGauge(
+    double load, double targetLoad, double lim, double min, double max)
 {
     ui->graphicsView_gauge->show();
+
+    int tmax = max;
+    max = min;
+    min = tmax;
+
+    double scale_range = max - min;
+    double scale_load = (load - min) / scale_range;
+    double scale_target = (targetLoad - min) / scale_range;
+    double scale_lim = lim / scale_range;
+
     //add a color gradient to the scene
     int h = ui->graphicsView_gauge->height();
     int w = ui->graphicsView_gauge->width();
     int o = 2;
-    int l = range;
+    int l = h * lim;
     int thickness = 2;
-    int load_value = load;
-    QLinearGradient gradient(0, -h / 2, 0, h / 2);
+    int load_value = scale_load * h;
+    QLinearGradient gradient(0, 0, 0, h);
     gradient.setColorAt(0, Qt::red);
-    gradient.setColorAt(0.25, Qt::yellow);
-    gradient.setColorAt(0.5, Qt::green);
-    gradient.setColorAt(0.75, Qt::yellow);
+    gradient.setColorAt(scale_target - scale_lim, Qt::yellow);
+    gradient.setColorAt(scale_target, Qt::green);
+    gradient.setColorAt(scale_target + scale_lim, Qt::yellow);
     gradient.setColorAt(1, Qt::red);
 
     //add a rectangle to the scene withou border and with the gradient
-    m_scene_gauge->addRect(-w / 2, -h / 2, w - o, h - o, QPen(Qt::NoPen),
+    m_scene_gauge->addRect(0, 0, w - o, h - o, QPen(Qt::NoPen),
                            QBrush(gradient));
     //add two lines to the scene to limit the gauge on the y axis
-    m_scene_gauge->addLine(-w / 2 + thickness / 2, targetLoad + l,
-                           w / 2 - o - thickness / 2, targetLoad + l,
+    m_scene_gauge->addLine(thickness, (scale_target - scale_lim) * h,
+                           w - thickness * 2, (scale_target - scale_lim) * h,
                            QPen(Qt::black, thickness));
-    m_scene_gauge->addLine(-w / 2 + thickness / 2, targetLoad - l,
-                           w / 2 - o - thickness / 2, targetLoad - l,
+    m_scene_gauge->addLine(thickness, (scale_target + scale_lim) * h,
+                           w - thickness * 2, (scale_target + scale_lim) * h,
                            QPen(Qt::black, thickness));
     //add a circle to the scene to display the load value
-    m_scene_gauge->addEllipse(-w / 2, load_value, w - o, w - o, QPen(Qt::NoPen),
-                              QBrush(Qt::black));
+    m_scene_gauge->addEllipse(0, load_value - w / 2, w - o, w - o,
+                              QPen(Qt::NoPen), QBrush(Qt::black));
     ui->graphicsView_gauge->setScene(m_scene_gauge);
 }
 
@@ -623,36 +750,34 @@ MainWindow::displayPatternCircle(double radius, double direction)
     int arrowWidth = 10;
     m_arrow = new QGraphicsEllipseItem();
     m_scene->addItem(m_arrow);
-    m_arrow->setRect(-radius*scale, -radius*scale, 2*radius*scale, 2*radius*scale);
+    m_arrow->setRect(-radius * scale, -radius * scale, 2 * radius * scale,
+                     2 * radius * scale);
     m_arrow->setStartAngle(0);
-    m_arrow->setSpanAngle(16*90);
+    m_arrow->setSpanAngle(16 * 90);
     m_arrow->setPen(QPen(Qt::blue, 10));
     //add a filled circle to the scene
-    m_scene->addEllipse(-radius*scale+arrowWidth/2, -radius*scale+arrowWidth/2, 2*radius*scale-arrowWidth, 2*radius*scale-arrowWidth,
-                        QPen(Qt::NoPen), QBrush(Qt::white));
-    
+    m_scene->addEllipse(
+        -radius * scale + arrowWidth / 2, -radius * scale + arrowWidth / 2,
+        2 * radius * scale - arrowWidth, 2 * radius * scale - arrowWidth,
+        QPen(Qt::NoPen), QBrush(Qt::white));
+
     //add a polygon in triangle shape to the scene
     //the triangle is pointing in the direction of the movement
     QPolygonF triangle;
     int triangleSize = 10;
-    std::cout << direction << std::endl;
-    if(direction >0)
+    if(direction > 0)
     {
-        triangle << QPointF(0, -radius*scale-triangleSize);
-        triangle << QPointF(0, -radius*scale+triangleSize);
-        triangle << QPointF(-triangleSize, -radius*scale);
+        triangle << QPointF(0, -radius * scale - triangleSize);
+        triangle << QPointF(0, -radius * scale + triangleSize);
+        triangle << QPointF(-triangleSize, -radius * scale);
     }
     else
     {
-        triangle << QPointF(radius*scale-triangleSize, 0);
-        triangle << QPointF(radius*scale+triangleSize, 0);
-        triangle << QPointF(radius*scale, triangleSize);
+        triangle << QPointF(radius * scale - triangleSize, 0);
+        triangle << QPointF(radius * scale + triangleSize, 0);
+        triangle << QPointF(radius * scale, triangleSize);
     }
     m_scene->addPolygon(triangle, QPen(Qt::blue, 2), QBrush(Qt::blue));
-    std::cout << direction << std::endl;
-
-    
-
 }
 
 void

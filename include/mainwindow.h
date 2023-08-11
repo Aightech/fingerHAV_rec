@@ -32,7 +32,7 @@ class Trial
     Trial(std::string userName, std::string texture, std::string type, int gid, int matid)
         : m_userName(userName), m_texture(texture), m_type(type), m_gid(gid), m_matid(matid)
     {
-        m_name = m_userName + "_" + m_texture + "_" + m_type + "_" + std::to_string(m_gid) + "_" + std::to_string(m_matid);
+        m_name = m_userName + "_" + m_texture + "_" + m_type +  "_" + std::to_string(m_matid);
     }
     ~Trial() {}
     void addComment(std::string comment)
@@ -93,7 +93,7 @@ class MainWindow : public QMainWindow
     void
     moveTargetRectangle(double dt, double speed, double width, double height);
     void
-    displayLoadGauge(double load, double targetLoad, double range);
+    displayLoadGauge(double load, double targetLoad, double range, double min=0, double max=100);
     void
     displayPatternCircle(double radius, double direction);
     void
@@ -104,6 +104,11 @@ class MainWindow : public QMainWindow
     pushButton_userName_released(); // set the user name, disable the button
     void
     pushButton_nbTrial_released(); // set the number of trial for each material, disable the button
+    void 
+    pushButton_tare_released()
+    {
+        m_tare = m_load;
+    }; // tare the loadcells
 
     /**
      * @brief Select the material selected in the treeWidget_mat.
@@ -158,6 +163,9 @@ class MainWindow : public QMainWindow
     void
     pushButton_load_released();
 
+    void 
+    pushButton_load_log_released();
+
     private:
     void
     unselect_trial();
@@ -208,5 +216,9 @@ class MainWindow : public QMainWindow
     QPen m_penTarget;
     int m_sizeTexture = 500;
     int m_sizeTarget = 50;
+    double m_last_finger_pos[2];
+
+    double m_tare=0;
+    double m_load=0;
 };
 #endif // MAINWINDOW_H

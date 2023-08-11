@@ -1,0 +1,159 @@
+[HEADER]
+user: alexis
+date: Fri Aug 11 10:01:37 2023
+number of trial: 5
+materials: [7t 10t 18t 39t 44t 54t 59t 83t 108t 120t ]
+streams: [7t 10t 18t 39t 44t 54t 59t 83t 108t 120t ]
+[LOGS]
+10:01:58: SELECT: 39t | trial1
+10:02:11: (alexis_39t_std_0) START
+10:03:11: (alexis_39t_std_0) END  duration: 60000ms
+10:03:18: SELECT: 39t | trial2
+10:03:30: (alexis_39t_std_1) START
+10:04:30: (alexis_39t_std_1) END  duration: 60000ms
+10:04:49: SELECT: 59t | trial1
+10:05:10: (alexis_59t_std_0) START
+10:06:09: (alexis_59t_std_0) END  duration: 60000ms
+10:06:14: SELECT: 83t | trial1
+10:07:07: (alexis_83t_std_0) START
+10:08:07: (alexis_83t_std_0) END  duration: 60000ms
+10:08:13: SELECT: 54t | trial1
+10:08:50: (alexis_54t_std_0) START
+10:09:50: (alexis_54t_std_0) END  duration: 60000ms
+10:09:56: SELECT: 39t | trial3
+10:10:34: (alexis_39t_std_2) START
+10:11:34: (alexis_39t_std_2) END  duration: 60000ms
+10:11:42: SELECT: 54t | trial2
+10:12:11: (alexis_54t_std_1) START
+10:13:11: (alexis_54t_std_1) END  duration: 60000ms
+10:13:19: (alexis_54t_std_1) COMMENTS: boom
+10:13:23: SELECT: 59t | trial2
+10:13:54: (alexis_59t_std_1) START
+10:14:54: (alexis_59t_std_1) END  duration: 60000ms
+10:15:05: (alexis_59t_std_1) COMMENTS: boom
+10:15:06: SELECT: 18t | trial1
+10:16:12: (alexis_18t_std_0) START
+10:17:12: (alexis_18t_std_0) END  duration: 60000ms
+10:17:23: SELECT: 120t | trial1
+10:17:58: (alexis_120t_std_0) START
+10:18:58: (alexis_120t_std_0) END  duration: 60000ms
+10:19:07: SELECT: 10t | trial1
+10:19:49: (alexis_10t_std_0) START
+10:20:49: (alexis_10t_std_0) END  duration: 60000ms
+10:21:11: SELECT: 18t | trial2
+10:22:04: (alexis_18t_std_1) START
+10:23:04: (alexis_18t_std_1) END  duration: 60000ms
+10:23:09: SELECT: 83t | trial2
+10:23:40: (alexis_83t_std_1) START
+10:24:39: (alexis_83t_std_1) END  duration: 60000ms
+10:24:53: SELECT: 7t | trial1
+10:25:19: (alexis_7t_std_0) START
+10:26:19: (alexis_7t_std_0) END  duration: 60000ms
+10:26:22: SELECT: 120t | trial2
+10:26:55: (alexis_120t_std_1) START
+10:27:55: (alexis_120t_std_1) END  duration: 60000ms
+10:28:02: SELECT: 39t | trial4
+10:28:45: (alexis_39t_cte_force_3) START
+10:29:45: (alexis_39t_cte_force_3) END  duration: 60000ms
+10:29:57: SELECT: 59t | trial3
+10:30:26: (alexis_59t_std_2) START
+10:31:26: (alexis_59t_std_2) END  duration: 60000ms
+10:33:02: SELECT: 7t | trial2
+10:33:23: (alexis_7t_std_1) START
+10:34:23: (alexis_7t_std_1) END  duration: 60000ms
+10:34:32: SELECT: 59t | trial4
+10:35:07: (alexis_59t_cte_force_3) START
+10:36:07: (alexis_59t_cte_force_3) END  duration: 60000ms
+10:36:13: SELECT: 18t | trial3
+10:37:12: (alexis_18t_std_2) START
+10:38:12: (alexis_18t_std_2) END  duration: 60000ms
+10:38:22: SELECT: 59t | trial5
+10:38:44: (alexis_59t_cte_speed_4) START
+10:39:44: (alexis_59t_cte_speed_4) END  duration: 60000ms
+10:39:51: SELECT: 10t | trial2
+10:40:19: (alexis_10t_std_1) START
+10:41:19: (alexis_10t_std_1) END  duration: 60000ms
+10:41:25: SELECT: 108t | trial1
+10:41:51: (alexis_108t_std_0) START
+10:42:51: (alexis_108t_std_0) END  duration: 60000ms
+10:42:54: SELECT: 83t | trial3
+10:43:28: (alexis_83t_std_2) START
+10:44:27: (alexis_83t_std_2) END  duration: 60000ms
+10:45:08: SELECT: 120t | trial3
+10:46:00: (alexis_120t_std_2) START
+10:46:59: (alexis_120t_std_2) END  duration: 60000ms
+10:47:03: SELECT: 18t | trial4
+10:47:40: (alexis_18t_cte_force_3) START
+10:48:39: (alexis_18t_cte_force_3) END  duration: 60000ms
+10:48:43: SELECT: 7t | trial3
+10:52:28: (alexis_7t_std_2) START
+10:53:28: (alexis_7t_std_2) END  duration: 60000ms
+10:53:31: SELECT: 18t | trial5
+10:54:57: (alexis_18t_cte_speed_4) START
+10:55:57: (alexis_18t_cte_speed_4) END  duration: 60000ms
+10:55:59: SELECT: 39t | trial5
+10:56:27: (alexis_39t_cte_speed_4) START
+10:57:27: (alexis_39t_cte_speed_4) END  duration: 60000ms
+10:57:30: SELECT: 83t | trial4
+10:57:57: (alexis_83t_cte_force_3) START
+10:58:57: (alexis_83t_cte_force_3) END  duration: 60000ms
+10:59:00: SELECT: 54t | trial3
+10:59:27: (alexis_54t_std_2) START
+11:00:27: (alexis_54t_std_2) END  duration: 60000ms
+11:00:39: SELECT: 120t | trial4
+11:01:19: (alexis_120t_cte_force_3) START
+11:02:19: (alexis_120t_cte_force_3) END  duration: 60000ms
+11:02:24: SELECT: 108t | trial2
+11:02:47: (alexis_108t_std_1) START
+11:03:47: (alexis_108t_std_1) END  duration: 60000ms
+11:04:04: SELECT: 120t | trial5
+11:05:05: (alexis_120t_cte_speed_4) START
+11:06:05: (alexis_120t_cte_speed_4) END  duration: 60000ms
+11:06:09: SELECT: 83t | trial5
+11:06:37: (alexis_83t_cte_speed_4) START
+11:07:37: (alexis_83t_cte_speed_4) END  duration: 60000ms
+11:07:51: SELECT: 10t | trial3
+11:08:11: (alexis_10t_std_2) START
+11:09:11: (alexis_10t_std_2) END  duration: 60000ms
+11:09:41: SELECT: 10t | trial4
+11:09:50: (alexis_10t_cte_force_3) START
+11:10:50: (alexis_10t_cte_force_3) END  duration: 60000ms
+11:10:53: SELECT: 44t | trial1
+11:11:18: (alexis_44t_std_0) START
+11:12:18: (alexis_44t_std_0) END  duration: 60000ms
+11:12:22: SELECT: 108t | trial3
+11:12:45: (alexis_108t_std_2) START
+11:13:45: (alexis_108t_std_2) END  duration: 60000ms
+11:13:52: SELECT: 44t | trial2
+11:14:09: (alexis_44t_std_1) START
+11:15:09: (alexis_44t_std_1) END  duration: 60000ms
+11:15:12: SELECT: 54t | trial4
+11:16:05: (alexis_54t_cte_force_3) START
+11:17:05: (alexis_54t_cte_force_3) END  duration: 60000ms
+11:17:10: SELECT: 7t | trial4
+11:17:37: (alexis_7t_cte_force_3) START
+11:18:36: (alexis_7t_cte_force_3) END  duration: 60000ms
+11:18:39: SELECT: 10t | trial5
+11:19:05: (alexis_10t_cte_speed_4) START
+11:20:05: (alexis_10t_cte_speed_4) END  duration: 60000ms
+11:20:19: SELECT: 7t | trial5
+11:20:43: (alexis_7t_cte_speed_4) START
+11:21:43: (alexis_7t_cte_speed_4) END  duration: 60000ms
+11:21:45: SELECT: 54t | trial5
+11:22:12: (alexis_54t_cte_speed_4) START
+11:23:12: (alexis_54t_cte_speed_4) END  duration: 60000ms
+11:23:15: SELECT: 44t | trial3
+11:23:45: (alexis_44t_std_2) START
+11:24:45: (alexis_44t_std_2) END  duration: 60000ms
+11:24:48: SELECT: 44t | trial4
+11:24:53: (alexis_44t_cte_force_3) START
+11:25:53: (alexis_44t_cte_force_3) END  duration: 60000ms
+11:25:58: SELECT: 44t | trial5
+11:26:05: (alexis_44t_cte_speed_4) START
+11:27:05: (alexis_44t_cte_speed_4) END  duration: 60000ms
+11:27:08: SELECT: 108t | trial4
+11:27:28: (alexis_108t_cte_force_3) START
+11:28:28: (alexis_108t_cte_force_3) END  duration: 60000ms
+11:28:31: SELECT: 108t | trial5
+11:28:36: (alexis_108t_cte_speed_4) START
+11:29:36: (alexis_108t_cte_speed_4) END  duration: 60000ms
