@@ -97,7 +97,7 @@ else ()
     if (Qt${QT_VERSION_MAJOR}_FOUND)
       list(APPEND EXTRA_LIBS Qt6::Widgets )
     else ()
-      message("Couldn't find Boost library")
+      message("Couldn't find Qt library")
     endif (Qt${QT_VERSION_MAJOR}_FOUND)
   endif()
   
@@ -200,7 +200,7 @@ else ()
   add_executable(${EXEC_NAME} ${MAIN_FILE} ${LIB_HEADERS} ${APP_FORM})
   target_link_libraries (${EXEC_NAME}
     PUBLIC ${LIB_NAME}
-    PUBLIC ${TOOL_LIBS}
+    PUBLIC ${TOOL_LIBS} 
     PRIVATE Qt6::PrintSupport)
   target_include_directories(${EXEC_NAME}
     PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
