@@ -469,6 +469,8 @@ MainWindow::pushButton_startTrial_released()
     //ui->label_motion->setText("Wait");
     //show
     ui->label_motion->show();
+    //tare 
+    pushButton_tare_released();
     //wait for 1s
     usleep(1000000);
 
