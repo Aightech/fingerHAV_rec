@@ -1,6 +1,13 @@
 # fingerHAV_rec
 fingerHAV_rec is a module for recording and analyzing finger motion data. It consists of several sub-programs that work together to capture and process data from multiple sources, including Kistler sensors, load cells, and stereoscopic cameras.
 
+# Requirements
+- CMake
+- qt6 (for GUI: sudo apt install qt6-base-dev qt6-tools-dev qtbase5-private-dev)
+- postgresql (for lslsub_dbfeeder: sudo apt install postgresql libpq-dev libboost-all-dev)
+- portaudio (for kistler: sudo apt install libasound-dev portaudio19-dev)
+- sfml (sudo apt install libsfml-dev)
+
 ##  Programs (in prgm/ folder)
 ### kistler
 This sub-program is used to capture accelerometer and audio data from Kistler sensors. It can be set up for continuous recording, and is designed to ensure that any run will work.
