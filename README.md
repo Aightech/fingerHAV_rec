@@ -51,6 +51,18 @@ The volunteer made best efforts to follow the displayed target in the GUI during
 The textures are selected randomly and changed after each trial to limit any "learning" and limit the disconfort of touching rougth texture for a prolonged time.
 
 
+### Submodules dependencies
+#### libraries
+- [built_lsl](lib/built_lsl/README.md)
+
+### Program dependencies
+- [finger_pos](prgm/finger_pos/README.md)
+- [loadcells](prgm/loadcells/README.md)
+- [kistler_DAQ](prgm/kistler_DAQ/README.md)
+- [lslsub_dbfeeder](prgm/lslsub_dbfeeder/README.md)
+- [lslsub_plotter](prgm/lslsub_plotter/README.md)
+
+
 
 # Building source code
 
@@ -71,3 +83,8 @@ to get the demonstration app usage.
 
 # Example
 Open the ![main.cpp](cpp:src/main.cpp) file to get an example how to use the lib.
+
+
+
+# Contributing
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
